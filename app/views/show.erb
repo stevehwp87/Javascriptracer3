@@ -1,0 +1,18 @@
+<h1 id="game" data-game-id=<%= @game.id %>>Winner is <%= @winner.name %></h1>
+
+<h1><%= @loser.name %> needs redbull, cigarettes, coffee</h1>
+
+<p><%= @player1.player.name %></p>
+<table>
+  <tr id="row1">
+    <% 20.times do |x| %>
+      <td class="box <%= "active" if @player1.final_index == x %>"></td>
+    <% end %>
+  </tr>
+  <tr id="row2">
+    <% 20.times do |x| %>
+      <td class="box <%= "active" if @player2.final_index == x %>"></td>
+    <% end %>
+  </tr>
+</table>
+<p><%= @player2.player.name %></p>

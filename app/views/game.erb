@@ -1,0 +1,133 @@
+<h1 id="game" data-game-id=<%= @game.id %>>Javascript Racer</h1>
+
+<p><%= @player1.name %></p>
+<table>
+  <tr id="row1">
+    <% 20.times do %>
+      <td class="box"></td>
+    <% end %>
+  </tr>
+  <tr id="row2">
+    <% 20.times do |x| %>
+      <td class="box"></td>
+    <% end %>
+  </tr>
+</table>
+<p><%= @player2.name %></p>
+
+
+<script>
+  $(document).ready(function(){
+
+    var start_time;
+    var end_time;
+
+
+    function Player(id, name, key){
+      this.id = id;
+      this.name = name;
+      this.key = key;
+      this.position = 1;
+    }
+
+    Player.prototype.move = function(){
+      var position = $("#row" + this.id + " td.active").index();
+      $("#row" + this.id + " td").eq(position).removeClass('active');
+      $("#row" + this.id + " td").eq(position + 1).addClass('active');
+      this.location = $("#row" + this.id + " td.active").index();
+
+    }
+
+    $('tr td:first-child').addClass("active");
+
+
+    function Game(player1, player2){
+      this.player1 = player1;
+      this.player2 = player2;
+      this.status = 1; // 0 = stop, 1 = start
+      // this.time =
+    }
+
+    Game.prototype.onKeyUp = function(code){
+      if (this.status != 1) {
+        return;
+      }
+
+      if (code == this.player1.key){//Q is player 1
+        this.player1.move();
+        if(checkIfWon(1)){
+          this.status = 0;
+          end_time = new Date().getTime();
+          var elapsedTime = end_time - start_time;
+          alert('Execution time: ' + elapsedTime);
+          submitWinner(1);
+          alert("Player 1 won!");}
+       }
+      else if (code == this.player2.key) {
+        this.player2.move();
+        if(checkIfWon(2)){
+          this.status = 0;
+          end_time = new Date().getTime();
+          var elapsedTime = end_time - start_time;
+          alert('Execution time: ' + elapsedTime);
+          submitWinner(2);
+          alert("Player 2 won!");}
+      }
+
+
+    };
+
+
+    var player1 = new Player("1", "player1", 81);
+    var player2 = new Player("2", "player2", 80);
+    var game = new Game(player1, player2);
+
+
+    // function moveActiveForward(row_index){
+    //   // find which index
+    //   var position = $("#row" + row_index + " td.active").index();
+    //   // get the box at that index and remove active
+    //   $("#row" + row_index + " td").eq(position).removeClass('active');
+    //   $("#row" + row_index + " td").eq(position + 1).addClass('active');
+    // }
+
+    function checkIfWon(id){
+      var position = $("#row" + id + " td.active").index();
+      var length = $("#row" + id + " td").length
+      if(position + 1 === length){
+        return true
+
+
+
+      }
+    }
+
+    function submitWinner(player_num){
+      var gameId = $("#game").data("game-id")
+      var loser;
+      player_num === 1 ? loser = 2 : loser = 1;
+      var loserIndex = $("#row" + loser + " td.active").index();
+      $.ajax({
+        type: "PUT",
+        url: "/games/" + gameId,
+        data: {"game_id": gameId, "winner_id": player_num,
+               "loser_index": loserIndex}
+      })
+      .done(function(response){
+        window.location = "/games/" + gameId
+      })
+
+    }
+
+    // q keycode is 81
+    // p keycode is 80
+     // var start = new Date().getTime();
+     start_time = new Date().getTime();
+    $(document).on("keyup",(function(event){
+      var code = event.keyCode || event.which;
+      game.onKeyUp(code);
+
+    }));
+
+  });
+</script>
